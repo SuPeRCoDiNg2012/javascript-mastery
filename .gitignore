@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-ssr
+dev-dist
+.vite
+coverage
+playwright-report
+test-results
+*.local
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
+*.log
+.freebuff/

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+# The course is public content; there is nothing private to crawl.
