@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Corso interattivo di JavaScript in 12 settimane — pedagogia attiva, offline-first, cross-device.",
+  "description": "Due corsi interattivi — JavaScript in 12 settimane e Affinity by Canva in 10 — con pedagogia attiva, offline-first e sync cross-device.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

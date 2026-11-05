@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 const items = [
   { to: '/', label: 'Home', icon: Home, end: true },
-  { to: '/course', label: 'Percorso', icon: BookOpen },
+  { to: '/course', label: 'Percorsi', icon: BookOpen },
   { to: '/review', label: 'Ripassi', icon: Flame },
   { to: '/stats', label: 'Stats', icon: LayoutDashboard },
   { to: '/settings', label: 'Profilo', icon: User },

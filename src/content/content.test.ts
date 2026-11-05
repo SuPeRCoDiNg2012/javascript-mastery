@@ -1,17 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { allExercises, lessons, weeks, weeks as courseWeeks } from './index';
+import { allExercises, courses, javascriptCourse, lessons } from './index';
 
 /**
- * Content contract: 12 weeks × 8 lessons, each lesson with four fading
- * exercises, a quiz with per-option feedback and one self-explanation.
+ * Content contract: every course has eight-lesson weeks; every lesson keeps the
+ * full pedagogical cycle, per-option quiz feedback and at most three concepts.
  */
 describe('course content', () => {
-  it('has 12 weeks with eight lessons each', () => {
-    expect(courseWeeks).toHaveLength(12);
-    for (const week of weeks) {
-      expect(week.lessons, week.id).toHaveLength(8);
+  it('keeps each course week at eight lessons', () => {
+    expect(javascriptCourse.weeks).toHaveLength(12);
+    for (const course of courses) {
+      for (const week of course.weeks) {
+        expect(week.lessons, week.id).toHaveLength(8);
+      }
     }
-    expect(lessons).toHaveLength(96);
+    expect(lessons).toHaveLength(176);
   });
 
   it('uses unique ids everywhere', () => {

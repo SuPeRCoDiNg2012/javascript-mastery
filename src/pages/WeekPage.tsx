@@ -8,7 +8,7 @@ import {
   useProgressRows,
   useQuizRows,
 } from '@/app/selectors';
-import { getWeek } from '@/content';
+import { getCourseOfWeek, getWeek } from '@/content';
 import NotFound from './NotFound';
 
 export default function WeekPage() {
@@ -22,14 +22,18 @@ export default function WeekPage() {
 
   if (!week) return <NotFound />;
 
+  const course = getCourseOfWeek(week.id);
   const done = week.lessons.filter((lesson) => completed.has(lesson.id)).length;
   const testUnlocked = done === week.lessons.length;
   const testRow = rows.find((row) => row.weekId === week.id && row.exerciseId === 'week-test');
 
   return (
     <div>
-      <Link to="/course" className="text-xs text-muted-foreground underline underline-offset-4">
-        Percorso
+      <Link
+        to={course ? `/course/${course.id}` : '/course'}
+        className="text-xs text-muted-foreground underline underline-offset-4"
+      >
+        {course?.shortTitle ?? 'Percorsi'}
       </Link>
 
       <p className="mt-6 text-xs uppercase tracking-[0.12em] text-muted-foreground">

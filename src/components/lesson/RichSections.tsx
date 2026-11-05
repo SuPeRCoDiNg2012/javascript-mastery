@@ -74,7 +74,7 @@ export function RichSections({ sections }: { sections: LessonSection[] }) {
                 <div className="rounded-lg border border-border bg-card p-4">
                   <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">
                     <Cpu className="h-3.5 w-3.5" aria-hidden />
-                    Cosa fa il computer, passo per passo
+                    Cosa succede, passo per passo
                   </p>
                   <ol className="space-y-1.5">
                     {section.steps.map((step, stepIndex) => (

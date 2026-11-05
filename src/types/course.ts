@@ -197,3 +197,14 @@ export interface Week {
     exercise: string;
   };
 }
+
+/** A course groups weeks and owns its own mastery sequence. */
+export interface Course {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  /** Short label used in compact navigation (e.g. "JavaScript"). */
+  shortTitle: string;
+  weeks: Week[];
+}

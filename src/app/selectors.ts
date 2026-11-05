@@ -1,6 +1,14 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
-import { lessons, weeks, lessonById, conceptLessons, getWeekTest } from '@/content';
+import {
+  lessons,
+  weeks,
+  courses,
+  lessonById,
+  conceptLessons,
+  getWeekTest,
+  getCourseOfWeek,
+} from '@/content';
 import { dueReviews } from '@/features/spaced-repetition/sm2';
 import { questForDate, questProgress } from '@/features/gamification/quests';
 import { dayKey, emptyStreak, streakMessage } from '@/features/gamification/streak';
@@ -107,10 +115,12 @@ export function completedLessonIds(rows: ProgressRow[]): Set<string> {
  * (all exercises, quizzes and explanations). Week one, lesson one is always open.
  */
 export function isLessonUnlocked(lesson: Lesson, completed: Set<string>): boolean {
-  if (lesson.id === lessons[0]?.id) return true;
-  const index = lessons.findIndex((item) => item.id === lesson.id);
+  const course = getCourseOfWeek(lesson.weekId);
+  const sequence = course ? course.weeks.flatMap((week) => week.lessons) : lessons;
+  if (lesson.id === sequence[0]?.id) return true;
+  const index = sequence.findIndex((item) => item.id === lesson.id);
   if (index <= 0) return true;
-  const previous = lessons[index - 1];
+  const previous = sequence[index - 1];
   return previous ? completed.has(previous.id) : true;
 }
 
@@ -185,19 +195,22 @@ export function computeWeekProgress(
   };
 }
 
-export function useCourseOverview(userId: string) {
+export function useCourseOverview(userId: string, courseId?: string) {
   const rows = useProgressRows(userId);
   const quizRows = useQuizRows(userId);
   const explainRows = useExplainRows(userId);
   const completed = completedLessonIds(rows);
+  const course = courseId ? courses.find((item) => item.id === courseId) : undefined;
+  const scopeWeeks = course?.weeks ?? weeks;
+  const scopeLessons = scopeWeeks.flatMap((week) => week.lessons);
 
-  const perLesson = lessons.map((lesson) => ({
+  const perLesson = scopeLessons.map((lesson) => ({
     lesson,
     completed: completed.has(lesson.id),
     progress: lessonProgress(lesson, rows, quizRows, explainRows),
   }));
 
-  const perWeek = weeks.map((week) => ({
+  const perWeek = scopeWeeks.map((week) => ({
     week,
     ...computeWeekProgress(
       week,
@@ -221,9 +234,10 @@ export function useCourseOverview(userId: string) {
     completed,
     perLesson,
     perWeek,
-    lessonsCompleted: completed.size,
+    course,
+    lessonsCompleted: perLesson.filter((item) => item.completed).length,
     weeksCompleted,
-    ratio: lessons.length === 0 ? 0 : completed.size / lessons.length,
+    ratio: scopeLessons.length === 0 ? 0 : perLesson.filter((item) => item.completed).length / scopeLessons.length,
   };
 }
 

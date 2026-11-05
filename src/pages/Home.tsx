@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAppStore } from '@/app/store';
 import { useResumeTarget, useStats } from '@/app/selectors';
-import { weeks, totalLessonCount, getWeek } from '@/content';
+import { courses, totalLessonCount, totalWeekCount, getWeek } from '@/content';
 import { dayKey } from '@/features/gamification/streak';
 import { minutesLabel } from '@/lib/date';
 
@@ -26,11 +26,11 @@ export default function Home() {
       <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">
         {returning
           ? 'Nessun ritardo da recuperare. Si riparte da un passo piccolo, quando vuoi.'
-          : 'Dodici settimane, un progetto reale. Un esercizio alla volta.'}
+          : 'Due corsi, progetti reali. Un esercizio alla volta.'}
       </p>
 
       <p className="mt-4 text-xs text-muted-foreground">
-        {stats.lessonsCompleted}/{totalLessonCount} lezioni · {stats.weeksCompleted}/12 settimane ·{' '}
+        {stats.lessonsCompleted}/{totalLessonCount} lezioni · {stats.weeksCompleted}/{totalWeekCount} settimane ·{' '}
         {minutesLabel(stats.totalMinutes)}
       </p>
 
@@ -44,14 +44,14 @@ export default function Home() {
         <p className="mt-1 text-sm text-muted-foreground">
           {resume
             ? `Settimana ${getWeek(resume.lesson.weekId)?.number ?? ''} · Lezione ${resume.lesson.number} · ${resume.lesson.minutes} min`
-            : 'Il valore ora è nel progetto: aggiungi una funzionalità al Quaderno delle spese.'}
+            : 'Il valore ora è nei progetti: riprendi un brand kit o aggiungi una funzionalità al Quaderno delle spese.'}
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
           <Link
-            to={resume ? `/lesson/${resume.lesson.id}` : '/week/week-12'}
+            to={resume ? `/lesson/${resume.lesson.id}` : '/course'}
             className="font-medium underline underline-offset-4"
           >
-            {resume?.reason === 'in-progress' ? 'Riprendi la lezione' : 'Apri il progetto'}
+            {resume?.reason === 'in-progress' ? 'Riprendi la lezione' : 'Scegli un corso'}
           </Link>
           <Link to="/review" className="text-muted-foreground underline underline-offset-4">
             Ripassi{stats.due.length > 0 ? ` (${stats.due.length})` : ''}
@@ -69,28 +69,31 @@ export default function Home() {
       <section className="mt-10" aria-labelledby="percorso">
         <div className="flex items-baseline justify-between">
           <h2 id="percorso" className="text-sm font-medium">
-            Percorso
+            Corsi
           </h2>
           <Link to="/course" className="text-xs text-muted-foreground underline underline-offset-4">
-            Tutte le settimane
+            Tutti i percorsi
           </Link>
         </div>
 
         <ul className="mt-3 border-t border-border">
-          {weeks.slice(0, 4).map((week) => {
-            const done = week.lessons.filter((lesson) => stats.completed.has(lesson.id)).length;
+          {courses.map((course) => {
+            const done = course.weeks
+              .flatMap((week) => week.lessons)
+              .filter((lesson) => stats.completed.has(lesson.id)).length;
+            const total = course.weeks.flatMap((week) => week.lessons).length;
             return (
-              <li key={week.id}>
+              <li key={course.id}>
                 <Link
-                  to={`/week/${week.id}`}
+                  to={`/course/${course.id}`}
                   className="flex items-baseline justify-between gap-4 border-b border-border py-3 text-sm hover:bg-muted/40"
                 >
                   <span>
-                    <span className="mr-3 text-xs tabular-nums text-muted-foreground">{week.number}</span>
-                    {week.title}
+                    <span className="block font-medium">{course.title}</span>
+                    <span className="mt-0.5 block text-xs text-muted-foreground">{course.subtitle}</span>
                   </span>
                   <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-                    {done}/{week.lessons.length}
+                    {done}/{total}
                   </span>
                 </Link>
               </li>

@@ -46,7 +46,7 @@ export const achievements: AchievementDefinition[] = [
   {
     id: 'exercises-100',
     title: '100 esercizi',
-    description: 'Cento esercizi: stai scrivendo JavaScript, non leggendolo.',
+    description: 'Cento esercizi: la pratica sta diventando abitudine.',
     icon: 'trophy',
     isEarned: (ctx) => ctx.exercisesCompleted >= 100,
   },
@@ -67,7 +67,7 @@ export const achievements: AchievementDefinition[] = [
   {
     id: 'first-project',
     title: 'Primo progetto',
-    description: 'Il Quaderno delle spese è iniziato.',
+    description: 'Il tuo primo progetto è iniziato.',
     icon: 'hammer',
     isEarned: (ctx) => ctx.weeksCompleted >= 2,
   },
@@ -102,7 +102,7 @@ export const achievements: AchievementDefinition[] = [
   {
     id: 'course-complete',
     title: 'Corso completato',
-    description: 'Dodici settimane, un progetto reale, JavaScript in mano.',
+    description: 'Un percorso completo, un progetto reale, una competenza in mano.',
     icon: 'trophy',
     isEarned: (ctx) => ctx.weeksCompleted >= 12,
   },

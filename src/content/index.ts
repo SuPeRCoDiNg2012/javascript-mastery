@@ -1,4 +1,4 @@
-import type { Exercise, Lesson, Quiz, Week } from '@/types/course';
+import type { Course, Exercise, Lesson, Quiz, Week } from '@/types/course';
 import { week01 } from './week-01';
 import { week02 } from './week-02';
 import { week03 } from './week-03';
@@ -11,25 +11,48 @@ import { week09 } from './week-09';
 import { week10 } from './week-10';
 import { week11 } from './week-11';
 import { week12 } from './week-12';
+import { affinityWeeks } from './affinity';
 
 /**
- * The course is a pure data registry: routes, search, spaced repetition and
- * tests all derive from these arrays. Adding a week means importing it here.
+ * The app is a pure data registry. Courses own their week sequence; routes,
+ * search, spaced repetition and mastery gating all derive from these arrays.
  */
-export const weeks: Week[] = [
-  week01,
-  week02,
-  week03,
-  week04,
-  week05,
-  week06,
-  week07,
-  week08,
-  week09,
-  week10,
-  week11,
-  week12,
-];
+export const javascriptCourse: Course = {
+  id: 'javascript',
+  title: 'JavaScript Mastery',
+  shortTitle: 'JavaScript',
+  subtitle: 'Da zero alla padronanza in 12 settimane',
+  description:
+    'Il percorso completo per programmare davvero: 96 lezioni, esercizi in sandbox, progetti reali e ripasso a intervalli.',
+  weeks: [
+    week01,
+    week02,
+    week03,
+    week04,
+    week05,
+    week06,
+    week07,
+    week08,
+    week09,
+    week10,
+    week11,
+    week12,
+  ],
+};
+
+export const affinityCourse: Course = {
+  id: 'affinity',
+  title: 'Affinity Mastery',
+  shortTitle: 'Affinity',
+  subtitle: 'Grafica professionale in 10 settimane',
+  description:
+    'Vettore, Pixel e Layout in un unico percorso: loghi, fotoritocco, brochure, poster e file pronti per la stampa. Esercizi pratici dentro Affinity by Canva.',
+  weeks: affinityWeeks,
+};
+
+export const courses: Course[] = [javascriptCourse, affinityCourse];
+
+export const weeks: Week[] = courses.flatMap((course) => course.weeks);
 
 export const lessons: Lesson[] = weeks.flatMap((week) => week.lessons);
 
@@ -37,8 +60,16 @@ export const lessonById = new Map<string, Lesson>(lessons.map((lesson) => [lesso
 
 export const weekById = new Map<string, Week>(weeks.map((week) => [week.id, week]));
 
-export const lessonNumberById = new Map<string, number>(
-  lessons.map((lesson) => [lesson.id, lesson.number]),
+export const courseById = new Map<string, Course>(courses.map((course) => [course.id, course]));
+
+const courseOfWeek = new Map<string, Course>(
+  courses.flatMap((course) => course.weeks.map((week) => [week.id, course] as const)),
+);
+
+const courseOfLesson = new Map<string, Course>(
+  courses.flatMap((course) =>
+    course.weeks.flatMap((week) => week.lessons.map((lesson) => [lesson.id, course] as const)),
+  ),
 );
 
 export function getWeek(id: string): Week | undefined {
@@ -49,19 +80,43 @@ export function getLesson(id: string): Lesson | undefined {
   return lessonById.get(id);
 }
 
+export function getCourse(id: string): Course | undefined {
+  return courseById.get(id);
+}
+
+export function getCourseOfWeek(weekId: string): Course | undefined {
+  return courseOfWeek.get(weekId);
+}
+
+export function getCourseOfLesson(lessonId: string): Course | undefined {
+  return courseOfLesson.get(lessonId);
+}
+
 export function getWeekOfLesson(lessonId: string): Week | undefined {
   const lesson = lessonById.get(lessonId);
   return lesson ? weekById.get(lesson.weekId) : undefined;
 }
 
+/** Sequence used by mastery gating: progress in one course never unlocks another. */
+export function courseLessons(courseId: string): Lesson[] {
+  const course = courseById.get(courseId);
+  return course ? course.weeks.flatMap((week) => week.lessons) : [];
+}
+
 export function nextLesson(lessonId: string): Lesson | undefined {
-  const index = lessons.findIndex((lesson) => lesson.id === lessonId);
-  return index >= 0 ? lessons[index + 1] : undefined;
+  const lesson = lessonById.get(lessonId);
+  if (!lesson) return undefined;
+  const sequence = courseLessons(getCourseOfLesson(lessonId)?.id ?? '');
+  const index = sequence.findIndex((item) => item.id === lessonId);
+  return index >= 0 ? sequence[index + 1] : undefined;
 }
 
 export function previousLesson(lessonId: string): Lesson | undefined {
-  const index = lessons.findIndex((lesson) => lesson.id === lessonId);
-  return index > 0 ? lessons[index - 1] : undefined;
+  const lesson = lessonById.get(lessonId);
+  if (!lesson) return undefined;
+  const sequence = courseLessons(getCourseOfLesson(lessonId)?.id ?? '');
+  const index = sequence.findIndex((item) => item.id === lessonId);
+  return index > 0 ? sequence[index - 1] : undefined;
 }
 
 export const allExercises: Exercise[] = lessons.flatMap((lesson) => lesson.exercises);
@@ -73,6 +128,8 @@ export const exerciseById = new Map<string, Exercise>(
 export const totalExerciseCount = allExercises.length;
 
 export const totalLessonCount = lessons.length;
+
+export const totalWeekCount = weeks.length;
 
 export const totalMinutes = lessons.reduce((sum, lesson) => sum + lesson.minutes, 0);
 
@@ -124,4 +181,18 @@ for (const lesson of lessons) {
   }
 }
 
-export { week01, week02, week03, week04, week05, week06, week07, week08, week09, week10, week11, week12 };
+export {
+  week01,
+  week02,
+  week03,
+  week04,
+  week05,
+  week06,
+  week07,
+  week08,
+  week09,
+  week10,
+  week11,
+  week12,
+  affinityWeeks,
+};

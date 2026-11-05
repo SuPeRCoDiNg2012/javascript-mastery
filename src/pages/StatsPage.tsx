@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 import { useAppStore } from '@/app/store';
 import { useStats } from '@/app/selectors';
+import { courses, totalLessonCount, totalWeekCount } from '@/content';
 import { formatDay, lastNDays, minutesLabel } from '@/lib/date';
 
 export default function StatsPage() {
@@ -22,13 +23,38 @@ export default function StatsPage() {
       <h1 className="text-2xl font-semibold tracking-tight">Statistiche</h1>
 
       <dl className="mt-8 border-t border-border">
-        <Row label="Lezioni" value={`${stats.lessonsCompleted}/96`} />
-        <Row label="Settimane" value={`${stats.weeksCompleted}/12`} />
+        <Row label="Lezioni" value={`${stats.lessonsCompleted}/${totalLessonCount}`} />
+        <Row label="Settimane" value={`${stats.weeksCompleted}/${totalWeekCount}`} />
         <Row label="Esercizi" value={`${stats.exercisesCompleted}/${stats.totalExercises}`} />
         <Row label="Quiz corretti" value={`${stats.correctQuizzes}/${stats.totalQuizzes}`} />
         <Row label="Tempo" value={minutesLabel(stats.totalMinutes)} />
         <Row label="Streak" value={`${stats.streak.current} giorni · record ${stats.streak.longest}`} />
       </dl>
+
+      <section className="mt-10" aria-labelledby="corsi">
+        <h2 id="corsi" className="text-sm font-medium">
+          Corsi
+        </h2>
+        <ul className="mt-3 border-t border-border">
+          {courses.map((course) => {
+            const courseLessons = course.weeks.flatMap((week) => week.lessons);
+            const done = courseLessons.filter((lesson) => stats.completed.has(lesson.id)).length;
+            return (
+              <li key={course.id}>
+                <Link
+                  to={`/course/${course.id}`}
+                  className="flex items-baseline justify-between gap-4 border-b border-border py-2.5 text-sm hover:bg-muted/40"
+                >
+                  <span>{course.title}</span>
+                  <span className="text-xs tabular-nums text-muted-foreground">
+                    {done}/{courseLessons.length}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
 
       <section className="mt-10" aria-labelledby="attivita">
         <h2 id="attivita" className="text-sm font-medium">

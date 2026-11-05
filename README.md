@@ -1,6 +1,8 @@
-# JavaScript Mastery
+# Mastery
 
-Corso interattivo di JavaScript **da zero alla padronanza in 12 settimane**. Non un catalogo di video: 96 lezioni, oltre 300 esercizi eseguiti in sandbox, quiz con feedback per ogni risposta, spiegazioni attive, ripasso a intervalli e un progetto che cresce settimana dopo settimana.
+Due corsi interattivi in un'unica app. **JavaScript Mastery** porta da zero alla padronanza in 12 settimane con 96 lezioni ed esercizi eseguiti in sandbox. **Affinity Mastery** insegna la grafica professionale in 10 settimane con 80 lezioni pratiche su Affinity by Canva: Vettore, Pixel e Layout.
+
+Non un catalogo di video: quiz con feedback per ogni risposta, spiegazioni attive, ripasso a intervalli e progetti che crescono settimana dopo settimana.
 
 Funziona **offline**, si installa come **PWA**, sincronizza i progressi tra dispositivi quando Supabase è configurato. Senza configurazione resta un'app locale completa: nessun account obbligatorio.
 
@@ -27,8 +29,9 @@ Funziona **offline**, si installa come **PWA**, sincronizza i progressi tra disp
 
 ## Cosa c'è dentro
 
-**Il corso**
-- 12 settimane × 8 lezioni (45–60 minuti ciascuna), in italiano.
+**I corsi**
+- **JavaScript Mastery**: 12 settimane × 8 lezioni (45–60 minuti ciascuna), in italiano.
+- **Affinity Mastery**: 10 settimane × 8 lezioni pratiche su Affinity by Canva, con esercizi manuali verificati a checklist, quiz, errori spiegati e brand kit progressivo.
 - 8 fasi pedagogiche per lezione: attivazione, spiegazione concreta, esempio lavorato, fading a 4 esercizi, contrasto sugli errori, self-explanation, quiz, chiusura metacognitiva.
 - Un progetto conduttore, il **Quaderno delle spese**, che cresce dalla settimana 1 alla 11; nella 12 si costruisce una **Todo App** completa.
 - Un blocco "Lato professionale" per settimana (DevTools, MDN, debug, performance) e un checkpoint di fine settimana.
@@ -144,14 +147,14 @@ Dettagli e modello dati in [`docs/SYNC.md`](docs/SYNC.md).
 
 ## Contenuti
 
-Tutto il corso è dato tipizzato in `src/content/week-XX/index.ts`, costruito con gli helper di `src/content/authoring.ts`. Nessun contenuto è scritto dentro i componenti.
+Tutti i corsi sono dati tipizzati. JavaScript vive in `src/content/week-XX/index.ts`; Affinity in `src/content/affinity/week-XX.ts`, costruito con gli helper di `src/content/affinity/authoring.ts`. Il registro `src/content/index.ts` espone `courses`, `weeks`, `lessons` e i lookup per corso. Nessun contenuto è scritto dentro i componenti.
 
 Per aggiungere o modificare una lezione: [`docs/CONTENT.md`](docs/CONTENT.md).
 
 ## Test
 
 ```bash
-npm test          # 21 test: SM-2, streak, verifica esercizi, integrità e densità dei contenuti
+npm test          # 24 test: SM-2, streak, verifica esercizi, integrità e densità dei contenuti
 npm run test:e2e  # Playwright: onboarding → lezione → esercizio → quiz → reload
 ```
 
@@ -181,7 +184,7 @@ vercel --prod
 - Il login Google richiede la configurazione del provider su Supabase e degli URL di redirect.
 - I promemoria sono un'opzione salvata ma non inviano notifiche push: scelta deliberata per non essere invadenti.
 - Le lezioni su DOM usano una fixture HTML fissa: alcuni esercizi liberi richiederebbero un documento personalizzato.
-- **Migrazione dei contenuti in corso**: 1 lezione su 96 è nel formato denso completo; le altre 95 sono nel formato compatto e vanno riscritte secondo lo standard in [`docs/CONTENT.md`](docs/CONTENT.md).
+- **Migrazione dei contenuti in corso**: nel corso JavaScript 1 lezione su 96 è nel formato denso completo; le altre 95 sono nel formato compatto e vanno riscritte secondo lo standard in [`docs/CONTENT.md`](docs/CONTENT.md). Le lezioni Affinity delle settimane 4–10 usano un formato pratico compatto (7 sezioni, 3 esercizi manuali, 2 quiz, 2 errori) e possono essere ampliate con lo stesso helper.
 - **Bundle iniziale ~338 kB gzip** (entry 271 + React 67): i contenuti delle 12 settimane sono nel chunk iniziale. La separazione è il prossimo intervento di performance.
 - Lighthouse e i budget di bundle vanno misurati su un deploy reale; la configurazione è pronta ma la misura non è inclusa qui.
 

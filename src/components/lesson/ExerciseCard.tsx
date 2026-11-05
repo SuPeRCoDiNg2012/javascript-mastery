@@ -44,6 +44,11 @@ export function ExerciseCard({ exercise, lesson, index, attempts, completed }: E
   const [wrongAttempts, setWrongAttempts] = useState(attempts > 0 && !completed ? Math.min(attempts, 4) : 0);
   const [lastDiagnosis, setLastDiagnosis] = useState<string | null>(null);
   const [passed, setPassed] = useState(completed);
+  const manual = exercise.check.kind === 'manual';
+  const checklist = exercise.check.kind === 'manual' ? exercise.check.checklist : [];
+  const [checked, setChecked] = useState<boolean[]>(() =>
+    checklist.map(() => completed),
+  );
 
   const failures = wrongAttempts;
   const canReveal = failures >= 5;
@@ -58,6 +63,23 @@ export function ExerciseCard({ exercise, lesson, index, attempts, completed }: E
     setCode(exercise.starterCode);
     setResult(null);
     setLastDiagnosis(null);
+  };
+
+  const completeManual = async () => {
+    if (!checked.every(Boolean)) return;
+    setPassed(true);
+    toast.success('Esercizio completato.', {
+      description: 'La verifica è nelle tue mani: hai controllato ogni punto.',
+    });
+    const feedback = await recordExerciseAttempt(userId, lesson, exercise, true);
+    for (const achievement of feedback.newAchievements) {
+      toast.success(`Achievement: ${achievement.title}`, { description: achievement.description });
+    }
+    if (feedback.lessonCompleted) {
+      toast.success('Lezione completata', {
+        description: 'Tutti gli esercizi, quiz e spiegazioni sono a posto.',
+      });
+    }
   };
 
   const run = async () => {
@@ -176,38 +198,95 @@ export function ExerciseCard({ exercise, lesson, index, attempts, completed }: E
           )}
         </div>
 
-        <CodeEditor value={code} onChange={setCode} ariaLabel={`Codice per ${exercise.title}`} minHeight="170px" />
+        {manual ? (
+          <div className="space-y-3">
+            <ul className="divide-y divide-border rounded-md border border-border">
+              {checklist.map((item, checkIndex) => (
+                <li key={item}>
+                  <label className="flex min-h-[44px] cursor-pointer items-start gap-3 px-4 py-3 text-sm leading-relaxed">
+                    <input
+                      type="checkbox"
+                      className="mt-1 h-4 w-4 accent-[hsl(var(--primary))]"
+                      checked={checked[checkIndex] ?? false}
+                      disabled={passed}
+                      onChange={(event) =>
+                        setChecked((current) =>
+                          current.map((value, index) =>
+                            index === checkIndex ? event.target.checked : value,
+                          ),
+                        )
+                      }
+                    />
+                    <span>{item}</span>
+                  </label>
+                </li>
+              ))}
+            </ul>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Button onClick={() => void run()} disabled={running} aria-label="Esegui il codice">
-            {running ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Play className="h-4 w-4" aria-hidden />}
-            {running ? 'Esecuzione…' : 'Esegui'}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={reset}>
-            <RotateCcw className="h-3.5 w-3.5" aria-hidden />
-            Ripristina
-          </Button>
-          {failures > 0 && (
-            <Badge variant="warning" className="gap-1">
-              <Lightbulb className="h-3 w-3" aria-hidden />
-              {failures} {failures === 1 ? 'tentativo' : 'tentativi'}
-            </Badge>
-          )}
-          {canReveal && (
-            <Button
-              variant={showSolution ? 'ghost' : 'outline'}
-              size="sm"
-              className={cn('ml-auto', !showSolution && 'border-primary text-primary')}
-              onClick={() => {
-                setShowSolution((value) => !value);
-                setUsedSolution(true);
-              }}
-            >
-              <Eye className="h-3.5 w-3.5" aria-hidden />
-              Mostra soluzione
-            </Button>
-          )}
-        </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                onClick={() => void completeManual()}
+                disabled={!checked.every(Boolean) || passed}
+              >
+                {passed ? 'Completato' : 'Segna come completato'}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSolution((value) => !value)}
+              >
+                <Eye className="h-3.5 w-3.5" aria-hidden />
+                Vedi procedura
+              </Button>
+              {!checked.every(Boolean) && (
+                <span className="text-xs text-muted-foreground">
+                  Spunta ogni punto quando l’hai verificato nell’app.
+                </span>
+              )}
+            </div>
+
+            <details className="rounded-md border border-border bg-muted/30 px-4 py-3 text-sm leading-relaxed">
+              <summary className="cursor-pointer text-xs font-medium">Indizi</summary>
+              <p className="mt-2 text-muted-foreground">{exercise.hints[0]}</p>
+              <p className="mt-1 text-muted-foreground">{exercise.hints[1]}</p>
+            </details>
+          </div>
+        ) : (
+          <>
+            <CodeEditor value={code} onChange={setCode} ariaLabel={`Codice per ${exercise.title}`} minHeight="170px" />
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Button onClick={() => void run()} disabled={running} aria-label="Esegui il codice">
+                {running ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Play className="h-4 w-4" aria-hidden />}
+                {running ? 'Esecuzione…' : 'Esegui'}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={reset}>
+                <RotateCcw className="h-3.5 w-3.5" aria-hidden />
+                Ripristina
+              </Button>
+              {failures > 0 && (
+                <Badge variant="warning" className="gap-1">
+                  <Lightbulb className="h-3 w-3" aria-hidden />
+                  {failures} {failures === 1 ? 'tentativo' : 'tentativi'}
+                </Badge>
+              )}
+              {canReveal && (
+                <Button
+                  variant={showSolution ? 'ghost' : 'outline'}
+                  size="sm"
+                  className={cn('ml-auto', !showSolution && 'border-primary text-primary')}
+                  onClick={() => {
+                    setShowSolution((value) => !value);
+                    setUsedSolution(true);
+                  }}
+                >
+                  <Eye className="h-3.5 w-3.5" aria-hidden />
+                  Mostra soluzione
+                </Button>
+              )}
+            </div>
+          </>
+        )}
 
         {ladder && (
           <div
@@ -229,7 +308,7 @@ export function ExerciseCard({ exercise, lesson, index, attempts, completed }: E
           </div>
         )}
 
-        <OutputPanel result={result} running={running} expected={expected} />
+        {!manual && <OutputPanel result={result} running={running} expected={expected} />}
 
         <AnimatePresence>
           {showSolution && (
@@ -252,7 +331,7 @@ export function ExerciseCard({ exercise, lesson, index, attempts, completed }: E
           )}
         </AnimatePresence>
 
-        {passed && result && (
+        {passed && (manual || result) && (
           <p className="flex items-start gap-2 rounded-md bg-success-soft px-3 py-2 text-sm text-success">
             <Check className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
             {exercise.explanation}

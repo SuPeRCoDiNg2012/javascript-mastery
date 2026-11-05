@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 const navItems = [
   { to: '/', label: 'Home', end: true },
-  { to: '/course', label: 'Percorso' },
+  { to: '/course', label: 'Percorsi' },
   { to: '/review', label: 'Ripassi' },
   { to: '/stats', label: 'Statistiche' },
   { to: '/settings', label: 'Impostazioni' },
@@ -21,9 +21,9 @@ export function Sidebar() {
     >
       <div className="px-6 py-7">
         <NavLink to="/" className="text-sm font-semibold tracking-tight">
-          JavaScript Mastery
+          Mastery
         </NavLink>
-        <p className="mt-1 text-xs text-muted-foreground">12 settimane</p>
+        <p className="mt-1 text-xs text-muted-foreground">Due corsi</p>
       </div>
 
       <nav className="flex-1 px-3">
